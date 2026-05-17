@@ -69,41 +69,56 @@ export function AiPredictionsModal({ isOpen, onClose }: AiPredictionsModalProps)
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/95 backdrop-blur-xl"
         >
-          {/* Background Grid */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
+          {/* Animated gradient background grid */}
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="absolute inset-0 bg-[linear-gradient(rgba(0,217,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,217,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"
+          />
 
-          <div className="w-full max-w-5xl h-[85vh] md:h-auto md:max-h-[90vh] bg-black border border-white/10 rounded-[2rem] relative z-10 flex flex-col overflow-hidden shadow-2xl">
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="w-full max-w-5xl h-[85vh] md:h-auto md:max-h-[90vh] glass border-cyan-neon/20 rounded-[2rem] relative z-10 flex flex-col overflow-hidden shadow-2xl"
+          >
             {/* Header */}
-            <header className="p-6 md:p-8 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6 shrink-0 bg-zinc-950">
+            <header className="p-6 md:p-8 border-b border-cyan-neon/20 flex flex-col md:flex-row md:items-center justify-between gap-6 shrink-0 bg-white/5">
               <div className="flex items-center gap-6">
-                <button 
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onClose}
-                  className="p-3 rounded-full bg-zinc-900 border border-white/5 hover:border-neon-lime hover:text-neon-lime transition-colors"
+                  className="p-3 rounded-full glass border-cyan-neon/30 hover:border-cyan-neon/60 hover:text-cyan-neon transition-colors"
                 >
                   <ArrowLeft size={20} />
-                </button>
+                </motion.button>
                 <div>
                   <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
-                    <Cpu className="text-neon-lime" /> Deep Market Forecast
+                    <Cpu className="text-cyan-neon drop-shadow-[0_0_10px_rgba(0,217,255,0.5)]" />
+                    <span className="bg-gradient-to-r from-cyan-neon to-magenta-neon bg-clip-text text-transparent">
+                      Deep Market Forecast
+                    </span>
                   </h2>
                   <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] mt-1">Analyzing: BTC/USD Aggregated Data</p>
                 </div>
               </div>
 
               {/* Timeframe Tabs */}
-              <div className="flex bg-zinc-900/50 p-1 rounded-xl border border-white/5">
+              <div className="flex glass border-cyan-neon/20 p-1 rounded-xl">
                 {(Object.keys(PREDICTIONS) as Timeframe[]).map((tf) => (
-                  <button
+                  <motion.button
                     key={tf}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTab(tf)}
                     className={`px-4 py-2 rounded-lg text-xs font-bold tracking-widest transition-all ${
-                      activeTab === tf 
-                        ? 'bg-neon-lime text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]' 
+                      activeTab === tf
+                        ? 'bg-gradient-to-r from-cyan-neon to-magenta-neon text-black shadow-[0_0_15px_rgba(0,217,255,0.3)]'
                         : 'text-zinc-500 hover:text-white'
                     }`}
                   >
                     {tf}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </header>
@@ -122,89 +137,111 @@ export function AiPredictionsModal({ isOpen, onClose }: AiPredictionsModalProps)
                   {/* Top Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Probability Meter */}
-                    <div className="bg-zinc-900/40 border border-white/5 p-6 rounded-2xl flex flex-col justify-center relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className="glass border-cyan-neon/20 p-6 rounded-2xl flex flex-col justify-center relative overflow-hidden hover:shadow-[0_0_20px_rgba(0,217,255,0.2)]"
+                    >
+                      <motion.div
+                        animate={{ opacity: [0.1, 0.2, 0.1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute top-0 right-0 p-4 text-cyan-neon/20"
+                      >
                         <Activity size={100} />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Success Probability</span>
+                      </motion.div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-neon mb-2">Success Probability</span>
                       <div className="flex items-end gap-3">
-                        <span className="text-6xl font-black text-white leading-none">{currentPrediction.probability}%</span>
+                        <motion.span
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          className="text-6xl font-black text-white leading-none"
+                        >
+                          {currentPrediction.probability}%
+                        </motion.span>
                         <span className={`text-sm font-bold uppercase tracking-widest mb-1 ${
-                          currentPrediction.trend === 'Bullish' ? 'text-neon-lime' :
-                          currentPrediction.trend === 'Bearish' ? 'text-red-500' : 'text-yellow-500'
+                          currentPrediction.trend === 'Bullish' ? 'text-cyan-neon drop-shadow-[0_0_5px_rgba(0,217,255,0.5)]' :
+                          currentPrediction.trend === 'Bearish' ? 'text-magenta-neon' : 'text-purple-accent'
                         }`}>
                           {currentPrediction.trend} Bias
                         </span>
                       </div>
                       {/* Progress Bar */}
-                      <div className="w-full h-2 bg-zinc-800 rounded-full mt-6 overflow-hidden">
-                        <motion.div 
+                      <div className="w-full h-2 bg-white/10 rounded-full mt-6 overflow-hidden">
+                        <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${currentPrediction.probability}%` }}
                           transition={{ duration: 1, ease: "easeOut" }}
                           className={`h-full ${
-                            currentPrediction.trend === 'Bullish' ? 'bg-neon-lime shadow-[0_0_10px_rgba(57,255,20,0.5)]' :
-                            currentPrediction.trend === 'Bearish' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-yellow-500'
+                            currentPrediction.trend === 'Bullish' ? 'bg-gradient-to-r from-cyan-neon to-cyan-neon shadow-[0_0_10px_rgba(0,217,255,0.5)]' :
+                            currentPrediction.trend === 'Bearish' ? 'bg-magenta-neon shadow-[0_0_10px_rgba(255,0,110,0.5)]' : 'bg-purple-accent'
                           }`}
                         />
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* Recommended Action */}
-                    <div className="bg-neon-lime/5 border border-neon-lime/20 p-6 rounded-2xl flex flex-col justify-center">
-                       <div className="flex items-center gap-2 mb-4">
-                         <BarChart3 size={16} className="text-neon-lime" />
-                         <span className="text-[10px] font-bold uppercase tracking-widest text-neon-lime">AI Recommended Action</span>
-                       </div>
-                       <p className="text-lg font-bold leading-relaxed text-white">
-                         "{currentPrediction.action}"
-                       </p>
-                    </div>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className="glass border-magenta-neon/20 p-6 rounded-2xl flex flex-col justify-center hover:shadow-[0_0_20px_rgba(255,0,110,0.2)]"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <BarChart3 size={16} className="text-magenta-neon" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-magenta-neon">AI Recommended Action</span>
+                      </div>
+                      <p className="text-lg font-bold leading-relaxed text-white">
+                        "{currentPrediction.action}"
+                      </p>
+                    </motion.div>
                   </div>
 
                   {/* Reasons & Risks */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Main Reasons */}
-                    <div className="bg-zinc-900/20 border border-white/5 p-6 rounded-2xl">
-                      <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-4">
-                        <CheckCircle size={18} className="text-white" />
-                        <h3 className="text-sm font-bold uppercase tracking-widest">Main Drivers</h3>
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      className="glass border-cyan-neon/20 p-6 rounded-2xl hover:shadow-[0_0_15px_rgba(0,217,255,0.2)]"
+                    >
+                      <div className="flex items-center gap-2 mb-6 border-b border-cyan-neon/20 pb-4">
+                        <CheckCircle size={18} className="text-cyan-neon" />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-cyan-neon">Main Drivers</h3>
                       </div>
                       <ul className="space-y-4">
                         {currentPrediction.reasons.map((reason, idx) => (
                           <li key={idx} className="flex items-start gap-3">
-                            <span className="text-neon-lime mt-1">▹</span>
+                            <span className="text-cyan-neon mt-1 drop-shadow-[0_0_3px_rgba(0,217,255,0.4)]">▹</span>
                             <span className="text-sm text-zinc-300 leading-relaxed">{reason}</span>
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </motion.div>
 
                     {/* Key Risks */}
-                    <div className="bg-zinc-900/20 border border-white/5 p-6 rounded-2xl">
-                      <div className="flex items-center gap-2 mb-6 border-b border-white/10 pb-4">
-                        <ShieldAlert size={18} className="text-red-400" />
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-100">Key Risks & Invalidations</h3>
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      className="glass border-magenta-neon/20 p-6 rounded-2xl hover:shadow-[0_0_15px_rgba(255,0,110,0.2)]"
+                    >
+                      <div className="flex items-center gap-2 mb-6 border-b border-magenta-neon/20 pb-4">
+                        <ShieldAlert size={18} className="text-magenta-neon" />
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-magenta-neon">Key Risks & Invalidations</h3>
                       </div>
                       <ul className="space-y-4">
                         {currentPrediction.risks.map((risk, idx) => (
                           <li key={idx} className="flex items-start gap-3">
-                            <span className="text-red-400 mt-1">▹</span>
+                            <span className="text-magenta-neon mt-1 drop-shadow-[0_0_3px_rgba(255,0,110,0.4)]">▹</span>
                             <span className="text-sm text-zinc-300 leading-relaxed">{risk}</span>
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </motion.div>
                   </div>
 
                 </motion.div>
               </AnimatePresence>
             </div>
-            
-            <footer className="p-4 border-t border-white/5 text-center bg-zinc-950 shrink-0">
-               <span className="text-[8px] uppercase tracking-[0.3em] text-zinc-600">Predictions are generated by Quant Network AI analyzing live on-chain and market sentiment data. Not financial advice.</span>
+
+            <footer className="p-4 border-t border-cyan-neon/10 text-center bg-white/5 shrink-0">
+              <span className="text-[8px] uppercase tracking-[0.3em] text-zinc-600">Predictions are generated by Quant Network AI analyzing live on-chain and market sentiment data. Not financial advice.</span>
             </footer>
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

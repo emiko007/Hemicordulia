@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, User, Wallet, LogOut } from 'lucide-react';
+import { Bell, User, Wallet, LogOut, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface TopBarProps {
@@ -11,7 +11,6 @@ interface TopBarProps {
 export function TopBar({ isLoggedIn, onLoginClick, onLogout }: TopBarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Mock notifications
   const notifications = [
     { id: 1, type: 'Suggestion', title: 'Your feature request was shipped!', time: '2h ago', unread: true },
     { id: 2, type: 'AMA', title: 'Live AMA with Vitalik starts in 10 mins', time: '10m ago', unread: true },
@@ -21,88 +20,115 @@ export function TopBar({ isLoggedIn, onLoginClick, onLogout }: TopBarProps) {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="h-20 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40">
-      
-      {/* Search */}
-      <div className="flex items-center gap-3 bg-zinc-900/50 border border-white/10 rounded-full px-4 py-2 w-64 focus-within:border-neon-lime/50 transition-colors">
-        <Search size={16} className="text-zinc-500" />
-        <input 
-          type="text" 
-          placeholder="Search modules, data..." 
-          className="bg-transparent border-none outline-none text-xs text-white placeholder-zinc-600 w-full font-sans"
-        />
+    <header className="h-20 glass border-b border-cyan-neon/10 flex items-center justify-between px-8 sticky top-0 z-40">
+      {/* Animated border glow */}
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-neon/30 to-transparent"></div>
+
+      {/* Left: User Auth / Wallet Connection */}
+      <div className="flex items-center gap-8">
+        {/* User Auth */}
+        {isLoggedIn ? (
+          <motion.div
+            layout
+            className="flex items-center gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-neon via-magenta-neon to-purple-accent flex items-center justify-center border border-cyan-neon/30 shadow-[0_0_15px_rgba(0,217,255,0.3)]"
+              >
+                <User size={14} className="text-black" />
+              </motion.div>
+              <div className="hidden md:block">
+                <div className="text-xs font-bold">0x71C...9A2</div>
+                <div className="text-[10px] text-cyan-neon uppercase tracking-widest">Level 4 Builder</div>
+              </div>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onLogout}
+              className="p-2 text-zinc-500 hover:text-magenta-neon transition-colors"
+            >
+              <LogOut size={16} />
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onLoginClick}
+            className="flex items-center gap-2 bg-gradient-to-r from-cyan-neon to-magenta-neon text-black hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all"
+          >
+            <Wallet size={14} /> Connect
+          </motion.button>
+        )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-6">
-        
+      <div className="flex-1" />
+
+      {/* Right: Notifications */}
+      <div className="flex items-center gap-8">
+        <div className="w-[1px] h-6 bg-gradient-to-b from-cyan-neon/20 to-magenta-neon/20"></div>
+
         {/* Notifications */}
         <div className="relative">
-          <button 
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 text-zinc-400 hover:text-white transition-colors relative"
+            className="p-2 text-zinc-400 hover:text-magenta-neon transition-colors relative group"
           >
-            <Bell size={20} />
+            <Bell size={20} className="group-hover:drop-shadow-[0_0_10px_rgba(255,0,110,0.5)]" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-neon-lime rounded-full shadow-[0_0_8px_rgba(57,255,20,0.8)]"></span>
+              <motion.span
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute top-1 right-1 w-2 h-2 bg-magenta-neon rounded-full shadow-[0_0_12px_rgba(255,0,110,0.8)]"
+              />
             )}
-          </button>
+          </motion.button>
 
           <AnimatePresence>
             {showNotifications && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full right-0 mt-4 w-80 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                className="absolute top-full right-0 mt-4 w-96 glass rounded-2xl overflow-hidden shadow-2xl border-magenta-neon/20"
               >
-                <div className="p-4 border-b border-white/5 bg-black/50 flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-widest">Notifications</h4>
-                  <span className="text-[10px] text-neon-lime cursor-pointer hover:underline">Mark all read</span>
+                <div className="p-4 border-b border-magenta-neon/20 flex items-center justify-between bg-white/5">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-magenta-neon">Notifications</h4>
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    className="p-1 hover:bg-magenta-neon/10 rounded-lg transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.map(n => (
-                    <div key={n.id} className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${n.unread ? 'bg-neon-lime/5' : ''}`}>
+                  {notifications.map((n) => (
+                    <motion.div
+                      key={n.id}
+                      whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                      className={`p-4 border-b border-magenta-neon/10 cursor-pointer ${
+                        n.unread ? 'bg-magenta-neon/5' : ''
+                      }`}
+                    >
                       <div className="flex items-start justify-between gap-4 mb-1">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{n.type}</span>
-                        <span className="text-[10px] text-zinc-600">{n.time}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-magenta-neon">
+                          {n.type}
+                        </span>
+                        <span className="text-[10px] text-zinc-500">{n.time}</span>
                       </div>
                       <p className="text-sm text-zinc-200">{n.title}</p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
-        <div className="w-[1px] h-6 bg-white/10"></div>
-
-        {/* User Auth */}
-        {isLoggedIn ? (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-neon-lime to-emerald-600 flex items-center justify-center border border-white/10">
-                <User size={14} className="text-black" />
-              </div>
-              <div className="hidden md:block">
-                <div className="text-xs font-bold">0x71C...9A2</div>
-                <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Level 4 Builder</div>
-              </div>
-            </div>
-            <button onClick={onLogout} className="p-2 text-zinc-500 hover:text-red-400 transition-colors">
-              <LogOut size={16} />
-            </button>
-          </div>
-        ) : (
-          <button 
-            onClick={onLoginClick}
-            className="flex items-center gap-2 bg-white text-black hover:bg-neon-lime px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(57,255,20,0.3)]"
-          >
-            <Wallet size={14} /> Connect
-          </button>
-        )}
-
       </div>
     </header>
   );
