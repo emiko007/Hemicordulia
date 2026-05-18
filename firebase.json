@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "cybersculpt-showcase",
+    "site": "hemicord-ai",
     "public": "dist",
     "ignore": [
       "firebase.json",
