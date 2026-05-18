@@ -10,7 +10,7 @@ const firebaseConfig = {
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 };
 
-// Initialize Firebase Admin only in production or if credentials exist
+// Initialize Firebase Admin only if credentials exist
 if (
   firebaseConfig.projectId &&
   firebaseConfig.privateKey &&
@@ -33,6 +33,7 @@ if (
   console.warn('⚠️  Firebase credentials not found. Running in demo mode.');
 }
 
-export const db = admin.firestore?.();
-export const auth = admin.auth?.();
+// Export database reference with optional chaining
+export const db = admin.apps && admin.apps.length > 0 ? admin.firestore?.() : null;
+export const auth = admin.apps && admin.apps.length > 0 ? admin.auth?.() : null;
 export default admin;

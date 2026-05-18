@@ -171,14 +171,15 @@ app.use((err: any, req: Request, res: Response) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+const portNumber = typeof PORT === 'string' ? parseInt(PORT, 10) : PORT;
+app.listen(portNumber, '0.0.0.0', () => {
   console.log('');
   console.log('╔════════════════════════════════════════╗');
   console.log('║   CyberSculpt Backend Server Started   ║');
   console.log('╠════════════════════════════════════════╣');
-  console.log(`║ 🚀 Port: ${PORT}`.padEnd(38) + '║');
+  console.log(`║ 🚀 Port: ${portNumber}`.padEnd(38) + '║');
   console.log(`║ 🌐 Frontend: ${FRONTEND_URL}`.padEnd(38) + '║');
-  console.log(`║ 📊 API: http://localhost:${PORT}/api`.padEnd(38) + '║');
+  console.log(`║ 📊 API: http://localhost:${portNumber}/api`.padEnd(38) + '║');
   console.log('║                                        ║');
   console.log('║ Available endpoints:                   ║');
   console.log('║  POST   /api/analyze                   ║');
