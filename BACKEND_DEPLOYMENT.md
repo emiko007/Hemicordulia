@@ -1,8 +1,8 @@
-# Backend Deployment Guide - Render Hosting
+# Backend Deployment Guide - Google Cloud Run
 
 **Status:** Backend ready for deployment  
-**Target:** Render (Free tier Node.js hosting)  
-**Time:** 5 minutes
+**Target:** Google Cloud Run (Free tier Docker hosting)  
+**Time:** 10 minutes
 
 ---
 
@@ -11,104 +11,119 @@
 ✅ Frontend deployed: https://hemicord-ai.web.app  
 ✅ Firestore database: Configured & secured  
 ✅ Backend built: TypeScript compiled to JavaScript  
-⏳ Backend hosting: Ready for Render deployment
+✅ Docker image: Dockerfile created & optimized  
+⏳ Backend hosting: Ready for Cloud Run deployment
 
 ---
 
-## 🎯 Two Deployment Options
+## 🎯 Why Google Cloud Run?
 
-### Option 1: Render (RECOMMENDED) ✅
-- **Hosting:** Free tier with easy GitHub integration
-- **Setup:** 5 minutes
-- **Features:** Auto-deploy on git push
-- **Cost:** Free (with 15-min spindown) or $7/mo for always-on
+✅ **2 Million free requests/month** (vs Render's limited free tier)  
+✅ **Always-on** (no 15-minute spindown)  
+✅ **Excellent performance** (low latency)  
+✅ **Auto-scaling** included  
+✅ **$0-5/month typical cost**
 
-### Option 2: Heroku (Legacy)
-- Note: Free tier discontinued in 2022
-- Alternative: Heroku Eco Dynos ($5/month)
+### vs Other Options
+| Service | Free Tier | Always-On | Setup |
+|---------|-----------|-----------|-------|
+| **Cloud Run** | 2M reqs | ✅ Yes | Medium |
+| Render | Limited | ❌ (15m) | Simple |
+| Railway | $5 credit | ✅ Yes | Simple |
+| Heroku | None | N/A | N/A |
 
 ---
 
-## 🚀 Deploy to Render (Step by Step)
+## 🚀 Deploy to Cloud Run (Step by Step)
 
-### Prerequisite: Frontend Deployment ✅
+### Prerequisites ✅
 - [x] Frontend at https://hemicord-ai.web.app
 - [x] Firestore database deployed
 - [x] Backend code in GitHub (emiko007/Hemicordulia)
+- [x] Dockerfile created in root
+- [ ] Google account (free)
+- [ ] Google Cloud SDK installed
 
-### Step 1: Create Render Account (2 min)
+### Step 1: Create Google Cloud Project (2 min)
 
-1. Visit https://render.com
-2. Click "Sign Up"
-3. Select "GitHub"
-4. Authorize your GitHub account
+1. Visit: https://console.cloud.google.com
+2. Click project dropdown (top left)
+3. Click **"New Project"**
+4. **Name:** hemicord-ai
+5. Click **"Create"** → wait 1-2 seconds
+6. Click new project to open
 
-### Step 2: Deploy Web Service (2 min)
+### Step 2: Enable Required APIs (1 min)
 
-1. In Render dashboard, click "New +" → "Web Service"
-2. Select "GitHub" and authorize
-3. Search for and select "Hemicordulia" repository
-4. Fill in deployment settings:
+1. Search: **"Cloud Run API"** → Enable
+2. Search: **"Artifact Registry API"** → Enable
+3. Search: **"Cloud Build API"** → Enable
 
-```
-Name:                hemicord-api
-Runtime:             Node
-Region:              (Select your region)
-Build Command:       cd server && npm install && npm run build
-Start Command:       cd server && npm start
-Plan:                Free
-```
+### Step 3: Install Google Cloud SDK or Use Cloud Shell (2 min)
 
-5. Click "Create Web Service"
+**Option A: Use Cloud Shell (No Installation Required)**
+- Top right in Cloud Console → Click **"Activate Cloud Shell"**
+- Terminal opens in browser
+- Skip to Step 4
 
-**Build takes 2-3 minutes...**
+**Option B: Install Locally**
+1. Download: https://cloud.google.com/sdk/docs/install-gcloud
+2. Run installer
+3. Terminal: `gcloud init`
 
-### Step 3: Configure Environment Variables (1 min)
+### Step 4: Deploy to Cloud Run (3 min)
 
-While building, scroll to "Environment" section:
-
-| Variable | Value |
-|----------|-------|
-| `PORT` | `3001` |
-| `NODE_ENV` | `production` |
-| `FRONTEND_URL` | `https://hemicord-ai.web.app` |
-| `FIREBASE_PROJECT_ID` | `hemicord-ai` |
-| `FIREBASE_CLIENT_EMAIL` | `firebase-adminsdk-fbsvc@hemicord-ai.iam.gserviceaccount.com` |
-| `FIREBASE_DATABASE_URL` | `https://hemicord-ai.firebaseio.com` |
-| `FIREBASE_PRIVATE_KEY` | (See below) |
-
-**For FIREBASE_PRIVATE_KEY:**
-
-Open your saved JSON file and copy the full `private_key` value including `\n` characters:
-
-```json
-"private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...(full key)...==\n-----END PRIVATE KEY-----\n"
+**Set project:**
+```bash
+gcloud config set project hemicord-ai
 ```
 
-### Step 4: Wait for Build to Complete
+**Deploy command:**
+```bash
+gcloud run deploy hemicord-api \
+  --source=. \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars PORT=3001,NODE_ENV=production,\
+FRONTEND_URL=https://hemicord-ai.web.app,\
+FIREBASE_PROJECT_ID=hemicord-ai,\
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@hemicord-ai.iam.gserviceaccount.com,\
+FIREBASE_DATABASE_URL=https://hemicord-ai.firebaseio.com,\
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n(YOUR_ACTUAL_KEY)\n-----END PRIVATE KEY-----\n"
+```
 
-Green checkmark ✅ = Success!
+**Replace `YOUR_ACTUAL_KEY`** with your Firebase private key.
+
+**Build & deployment time: ~2-3 minutes**
+
+---
+
+## ✅ Your Service is Live!
+
+After deployment, you'll see:
+```
+✓ Deploying...
+✓ Build complete!
+Service deployed to Cloud Run
+Service URL: https://hemicord-api-xxxxx.run.app
+Region: us-central1
+```
 
 ---
 
 ## ✅ Verify Deployment
 
-Once live, test your API:
-
 ```bash
 # Test 1: Health check
-curl https://hemicord-api-xxxx.onrender.com/api/health
+curl https://hemicord-api-xxxxx.run.app/api/health
 
 # Test 2: Market analysis
-curl -X POST https://hemicord-api-xxxx.onrender.com/api/analyze \
+curl -X POST https://hemicord-api-xxxxx.run.app/api/analyze \
   -H "Content-Type: application/json" \
   -d '{"query":"Is Bitcoin bullish?"}'
 
-# Expected response:
-{
-  "analysis": "BTC at $49,682...",
-  "metrics": {...}
-}
+# Expected: { "analysis": "BTC at ...", "metrics": {...} }
 ```
 
 ---
@@ -119,7 +134,7 @@ See [FRONTEND_API_INTEGRATION.md](./FRONTEND_API_INTEGRATION.md)
 
 1. Create `.env.production`:
 ```env
-VITE_API_URL=https://hemicord-api-xxxx.onrender.com
+VITE_API_URL=https://hemicord-api-xxxxx.run.app
 ```
 
 2. Build & redeploy:
@@ -133,7 +148,7 @@ firebase deploy --only hosting
 ## 📊 API Endpoints (After Deployment)
 
 ```
-Base URL: https://hemicord-api-xxxx.onrender.com
+Base URL: https://hemicord-api-xxxxx.run.app
 
 POST   /api/analyze      - Market analysis
 GET    /api/analyses     - Query history
@@ -144,18 +159,31 @@ GET    /api/health       - Health check
 
 ---
 
-## ⏸️ Important: Free Tier Spindown
+## ✅ Cloud Run Free Tier Benefits
 
-After 15 minutes of inactivity, your service will spin down.
+**Monthly quotas (per project):**
+- 2,000,000 requests ✅
+- 360,000 GB-seconds compute ✅
+- 1 GB egress ✅
+- **Total monthly cost: $0**
 
-**Impact:**
-- First request after spindown: ~30 seconds
-- All subsequent requests: Normal speed
+**For your app:**
+- Typical request: ~1-2 seconds
+- Estimated monthly requests: 100,000
+- Monthly cost: **$0** (within free tier)
 
-**Options:**
-- Keep free tier (acceptable for testing)
-- Upgrade to Starter plan ($7/month) - Always on
-- Setup uptime monitoring to prevent spindown
+---
+
+## ⏸️ Cloud Run vs Other Services
+
+| Feature | Cloud Run | Render |
+|---------|-----------|--------|
+| Free Tier | 2M reqs | Limited |
+| Always-on | ✅ Yes | ❌ (15m spindown) |
+| Setup | Medium | Simple |
+| Performance | Excellent | Good |
+| Scaling | Auto | Auto |
+| Cost | $0-5/mo | $7/mo |
 
 ---
 
@@ -163,108 +191,116 @@ After 15 minutes of inactivity, your service will spin down.
 
 ### Build Failed
 ```
-Check logs in Render dashboard
-Look for: "npm ERR!" or missing dependencies
-Solution: Verify build command includes: npm install
+Check logs: gcloud run logs read hemicord-api --limit 50
+Common: Missing environment variables
+Solution: Add all 7 env vars before deploying
 ```
 
 ### "Cannot find module"
 ```
-Error: Cannot find module 'firebase-admin'
-Solution: Build command MUST include: npm install
-Already set: ✓
+Check: Dockerfile in root directory
+Check: server/package.json exists
+Check: Build command correct: cd server && npm run build
 ```
 
-### CORS Error
+### CORS Error from Frontend
 ```
-Error: CORS policy blocked request
-Solution: Check FRONTEND_URL exactly matches deployed frontend
-Should be: https://hemicord-ai.web.app
+Verify: FRONTEND_URL = https://hemicord-ai.web.app (exact)
+Fix: Update FRONTEND_URL in Cloud Run environment
+Redeploy: gcloud run deploy ... with updated vars
 ```
 
 ### Firebase Auth Failed
 ```
-Error: Invalid credentials
-Solution: Verify FIREBASE_PRIVATE_KEY preserves \n characters
-Copy from .env file, not directly from .json
+Check: FIREBASE_PRIVATE_KEY has \n characters preserved
+Example: ...key...\n-----END PRIVATE KEY-----\n
+Not: ...key...-----END PRIVATE KEY-----
 ```
 
-### Service Logs
-View logs: Click service name → "Logs" tab
-Look for error messages and stack traces
+### View Detailed Logs
+```bash
+# Real-time logs
+gcloud run logs read hemicord-api --limit 100 --follow
+
+# Or in Cloud Console:
+Cloud Run → hemicord-api → Logs tab
+```
 
 ---
 
 ## 📈 Monitoring
 
-### Check Service Health
-1. Render Dashboard → Your service
-2. Click "Logs" tab
-3. Monitor for errors
+### View Metrics (Cloud Console)
+1. Cloud Run → hemicord-api
+2. Metrics tab
+3. Monitor: Requests, latency, errors, CPU
 
-### Monitor API Usage
-1. Firebase Console → Firestore → Usage
-2. Check read/write operations
+### Set Alerts
+1. Cloud Run → hemicord-api → Settings
+2. Create alert for errors or timeouts
 
 ---
 
 ## 💰 Cost Breakdown
 
-| Service | Free Tier | Paid Tier |
-|---------|-----------|-----------|
-| **Render** | Free (spindown) | $7/month (always-on) |
-| **Firebase** | $0 (within limits) | Pay per use |
-| **Total** | **$0/month** | **$7/month** |
+| Item | Free Tier | Cost |
+|------|-----------|------|
+| Cloud Run requests | 2M/month | $0 |
+| Compute time | 360K GB-s/month | $0 |
+| Egress | 1 GB/month | $0 |
+| **Total** | | **$0/month** |
+
+**Upgrade options:**
+- Stay free (recommended for MVP)
+- Add more resources as needed
+- Budget alert: Set to $10/month
 
 ---
 
-## 🎯 Complete Architecture
+## 🎯 Architecture
 
 ```
 User Browser
     ↓
-https://hemicord-ai.web.app (Firebase Hosting)
+https://hemicord-ai.web.app
+(Firebase Hosting - LIVE)
     ↓
-    ├→ Static assets (React, CSS, JS)
-    └→ API calls ↓
-    
-https://hemicord-api-xxxx.onrender.com (Render Backend)
+API Calls ↓
+    ↓
+https://hemicord-api-xxxxx.run.app
+(Cloud Run - Google - LIVE)
     ↓
     ├→ /api/analyze - AdvancedTemporalAgent
     ├→ /api/analyses - Firestore queries
     └→ /api/feedback - Firestore writes
-    
-https://hemicord-ai.firebaseio.com (Firestore)
-    ↓
-    ├→ analyses collection (read/write)
-    └→ feedback collection (read/write)
+        ↓
+Firebase Firestore
+(Database - LIVE)
 ```
 
 ---
 
 ## ✨ Success Checklist
 
-- [ ] Render account created
-- [ ] Web Service deployed from GitHub
+- [ ] Google Cloud project created
+- [ ] Required APIs enabled
+- [ ] Dockerfile verified
+- [ ] Service deployed to Cloud Run
 - [ ] Environment variables configured
-- [ ] Build completed (green checkmark)
 - [ ] Health endpoint responds (200 OK)
 - [ ] Market analysis endpoint works
-- [ ] Frontend updated to use new API URL
+- [ ] Frontend updated
 - [ ] Full end-to-end test passes
 
 ---
 
 ## 📚 Resources
 
-- [Render Documentation](https://render.com/docs/deploy-node)
-- [Express.js Guide](https://expressjs.com)
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Your GitHub Repo](https://github.com/emiko007/Hemicordulia)
-
----
-
-**You're ready to deploy! See [RENDER_DEPLOY_GUIDE.md](./RENDER_DEPLOY_GUIDE.md) for detailed steps.**
+- [Cloud Run Docs](https://cloud.google.com/run/docs)
+- [Dockerfile Best Practices](https://cloud.google.com/run/docs/quickstarts/build-and-deploy)
+- [Free Tier Guide](https://cloud.google.com/run/pricing)
+- [Environment Variables](https://cloud.google.com/run/docs/configuring/environment-variables)
+- [GitHub: emiko007/Hemicordulia](https://github.com/emiko007/Hemicordulia)
 - ✅ Functions
 
 ### Step 3: Setup Firestore
