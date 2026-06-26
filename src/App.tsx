@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Hero } from './components/Hero';
 import { AgentModulesSection } from './components/AgentModulesSection';
@@ -22,10 +22,26 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeView, setActiveView] = useState<ViewState>('modules');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Overlays State
   const [purchasedProduct, setPurchasedProduct] = useState<string | null>(null);
   const [showPredictions, setShowPredictions] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Secure View Handler
   const handleViewChange = (view: ViewState) => {
@@ -33,7 +49,11 @@ export default function App() {
       setShowAuthModal(true);
       return;
     }
+
     setActiveView(view);
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
   };
 
   const renderView = () => {
@@ -83,8 +103,18 @@ export default function App() {
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-dark/20 to-black pointer-events-none" />
 
-      {/* Sidebar Navigation */}
-      <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && isMobile && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[99] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Navigation - Responsive */}
+      <div className={`fixed lg:static w-64 h-screen z-[100] lg:z-10 transform transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
@@ -95,18 +125,19 @@ export default function App() {
             setIsLoggedIn(false);
             setActiveView('modules');
           }}
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        <main className="flex-1 overflow-y-auto relative scroll-smooth">
+        <main className="flex-1 overflow-y-auto relative scroll-smooth px-4 md:px-8 max-w-7xl mx-auto w-full">
           {renderView()}
 
           {/* Global Footer */}
           {activeView === 'modules' && (
-            <footer className="py-24 border-t border-cyan-neon/10 bg-gradient-to-t from-black via-transparent to-transparent relative z-10">
-              <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-12">
+            <footer className="py-12 md:py-24 border-t border-cyan-neon/10 bg-gradient-to-t from-black via-transparent to-transparent relative z-10 mt-12">
+              <div className="container mx-auto px-0 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12">
                 <motion.div className="flex flex-col gap-2">
-                  <h4 className="text-xl font-black uppercase tracking-tighter group cursor-pointer">
-                    <span className="text-cyan-neon group-hover:drop-shadow-[0_0_15px_rgba(0,217,255,0.6)]">Quant</span>
+                  <h4 className="text-lg md:text-xl font-black uppercase tracking-tighter group cursor-pointer">
+                    <span className="text-cyan-neon group-hover:drop-shadow-[0_0_15px_rgba(0,217,255,0.6)]">HEMICORD</span>
                     <span className="text-magenta-neon group-hover:drop-shadow-[0_0_15px_rgba(255,0,110,0.6)]">AI</span>
                   </h4>
                   <p className="text-xs text-zinc-600 uppercase tracking-widest">
@@ -114,8 +145,8 @@ export default function App() {
                   </p>
                 </motion.div>
 
-                <div className="text-right">
-                  <span className="text-[10px] font-black uppercase text-zinc-500 block mb-2 opacity-50 tracking-[0.5em]">Quant Network</span>
+                <div className="text-center md:text-right">
+                  <span className="text-[10px] font-black uppercase text-zinc-500 block mb-2 opacity-50 tracking-[0.5em]">Hemicord</span>
                   <span className="text-[10px] uppercase opacity-30">© 2026 All rights reserved.</span>
                 </div>
               </div>
